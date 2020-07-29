@@ -8,7 +8,6 @@ import org.jax.model.Item2PValueAndSimilarity;
 import org.jax.services.AbstractResources;
 import org.jax.services.CachedResources;
 import org.jax.utils.DiseaseDB;
-import org.json.simple.parser.ParseException;
 import org.monarchinitiative.phenol.ontology.data.TermId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,13 +55,8 @@ public class PhenopacketCommand extends PhenomiserCommand {
         }
 
         List<TermId> queryList;
-        try {
-            PhenopacketImporter ppimporter = PhenopacketImporter.fromJson(phenopacket);
-            queryList = ppimporter.getHpoTerms();
-        } catch (ParseException | IOException e) {
-            e.printStackTrace();
-            return;
-        }
+        PhenopacketImporter ppimporter = PhenopacketImporter.fromJson(phenopacket);
+        queryList = ppimporter.getHpoTerms();
 
         resources = new CachedResources(diseaseParser, cachePath, Math.min(queryList.size(), 10));
         resources.init();
