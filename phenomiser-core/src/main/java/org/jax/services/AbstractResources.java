@@ -1,9 +1,8 @@
 package org.jax.services;
 
 import org.jax.io.DiseaseParser;
-import org.jax.io.HpoParser;
-import org.monarchinitiative.phenol.base.PhenolException;
-import org.monarchinitiative.phenol.formats.hpo.HpoDisease;
+import org.monarchinitiative.phenol.annotations.formats.hpo.HpoDisease;
+
 
 import org.monarchinitiative.phenol.ontology.data.Ontology;
 import org.monarchinitiative.phenol.ontology.data.TermId;
@@ -16,14 +15,11 @@ import org.slf4j.LoggerFactory;
 import java.util.*;
 
 public abstract class AbstractResources {
-
     private static Logger logger = LoggerFactory.getLogger(AbstractResources.class);
-
-    protected HpoParser hpoParser;
 
     protected DiseaseParser diseaseParser;
 
-    protected Ontology hpo;
+    protected final Ontology hpo;
 
     protected Map<TermId, HpoDisease> diseaseMap;
 
@@ -39,64 +35,32 @@ public abstract class AbstractResources {
 
     protected ResnikSimilarity resnikSimilarity;
 
-    protected Map<Integer, List<TermId>> diseaseIndexToHpoTermsWithExpansion;
-    protected Map<Integer, List<TermId>> diseaseIndexToHpoTermsNoExpansion;
-
-    protected Map<Integer, TermId> diseaseIndexToDisease;
+    //protected Map<Integer, List<TermId>> diseaseIndexToHpoTermsWithExpansion;
+    //protected Map<Integer, List<TermId>> diseaseIndexToHpoTermsNoExpansion;
+    //protected Map<Integer, TermId> diseaseIndexToDisease;
 
     protected Map<Integer, ScoreDistribution> scoreDistributions;
 
 
 
-    public AbstractResources(HpoParser hpoParser, DiseaseParser diseaseParser) {
-        this.hpoParser = hpoParser;
+    public AbstractResources(DiseaseParser diseaseParser) {
+        this.hpo = diseaseParser.getHpo();
         this.diseaseParser = diseaseParser;
-    }
-
-    public void defaultInit() {
-        logger.trace("hpo initiation started");
-        hpo = this.getHpoParser().getHpo();
-        logger.trace("hpo initiation success");
-
-
-
-        logger.trace("disease annotation initiation started");
-        if (this.getDiseaseParser().getDiseaseMap() == null) {
-            try {
-                this.getDiseaseParser().init();
-            } catch (PhenolException e) {
-                e.printStackTrace();
-                logger.trace("disease annotation initiation failed");
-            }
-        }
-
-        logger.trace("disease annotation initiation success");
-
-        logger.trace("disease map initiation started");
         diseaseMap = this.diseaseParser.getDiseaseMap();
-        diseaseIdToHpoTermIdsWithExpansion = this.diseaseParser.getDiseaseIdToHpoTermIdsWithExpansion();
+        diseaseIdToHpoTermIdsWithExpansion = this.diseaseParser.getDiseaseIdToHpoIdsPropagated();
         diseaseIdToHpoTermIdsNoExpansion = this.diseaseParser
-                .getDiseaseIdToHpoTermIdsNoExpansion();
-        hpoTermIdToDiseaseIdsWithExpansion = this.diseaseParser.getHpoTermIdToDiseaseIdsWithExpansion();
+                .getDiseaseIdToDirectHpoTermIds();
+        hpoTermIdToDiseaseIdsWithExpansion = this.diseaseParser.getHpoIdToDiseaseIdsPropagated();
         hpoTermIdToDiseaseIdsNoExpansion = this.diseaseParser
-                .getHpoTermIdToDiseaseIdsNoExpansion();
-        diseaseIndexToDisease = this.diseaseParser.getDiseaseIndexToDisease();
-        diseaseIndexToHpoTermsWithExpansion = this.diseaseParser.getDiseaseIndexToHpoTermsWithExpansion();
-        diseaseIndexToHpoTermsNoExpansion = this.diseaseParser
-                .getDiseaseIndexToHpoTermsNoExpansion();
+                .getHpoTermIdToDiseaseIdsDirect();
+       // diseaseIndexToDisease = this.diseaseParser.getIndexToDisease();
+       // diseaseIndexToHpoTermsWithExpansion = this.diseaseParser.getDiseaseIndexToHpoTermsWithExpansion();
+       // diseaseIndexToHpoTermsNoExpansion = this.diseaseParser
+        //        .getDiseaseIndexToHpoTermsNoExpansion();
         logger.trace("disease map initiation success");
-
     }
 
     public abstract void init();
-
-    public HpoParser getHpoParser() {
-        return hpoParser;
-    }
-
-    public void setHpoParser(HpoParser hpoParser) {
-        this.hpoParser = hpoParser;
-    }
 
     public DiseaseParser getDiseaseParser() {
         return diseaseParser;
@@ -108,10 +72,6 @@ public abstract class AbstractResources {
 
     public Ontology getHpo() {
         return hpo;
-    }
-
-    public void setHpo(Ontology hpo) {
-        this.hpo = hpo;
     }
 
     public Map<TermId, HpoDisease> getDiseaseMap() {
@@ -162,21 +122,21 @@ public abstract class AbstractResources {
         this.resnikSimilarity = resnikSimilarity;
     }
 
-    public Map<Integer, List<TermId>> getDiseaseIndexToHpoTermsWithExpansion() {
-        return diseaseIndexToHpoTermsWithExpansion;
-    }
+//    public Map<Integer, List<TermId>> getDiseaseIndexToHpoTermsWithExpansion() {
+//        return diseaseIndexToHpoTermsWithExpansion;
+//    }
+//
+//    public void setDiseaseIndexToHpoTermsWithExpansion(Map<Integer, List<TermId>> diseaseIndexToHpoTermsWithExpansion) {
+//        this.diseaseIndexToHpoTermsWithExpansion = diseaseIndexToHpoTermsWithExpansion;
+//    }
 
-    public void setDiseaseIndexToHpoTermsWithExpansion(Map<Integer, List<TermId>> diseaseIndexToHpoTermsWithExpansion) {
-        this.diseaseIndexToHpoTermsWithExpansion = diseaseIndexToHpoTermsWithExpansion;
-    }
+//   // public Map<Integer, TermId> getDiseaseIndexToDisease() {
+//        return diseaseIndexToDisease;
+//    }
 
-    public Map<Integer, TermId> getDiseaseIndexToDisease() {
-        return diseaseIndexToDisease;
-    }
-
-    public void setDiseaseIndexToDisease(Map<Integer, TermId> diseaseIndexToDisease) {
-        this.diseaseIndexToDisease = diseaseIndexToDisease;
-    }
+//    public void setDiseaseIndexToDisease(Map<Integer, TermId> diseaseIndexToDisease) {
+//        this.diseaseIndexToDisease = diseaseIndexToDisease;
+//    }
 
     public Map<Integer, ScoreDistribution> getScoreDistributions() {
         return scoreDistributions;
@@ -202,11 +162,11 @@ public abstract class AbstractResources {
         this.hpoTermIdToDiseaseIdsNoExpansion = hpoTermIdToDiseaseIdsNoExpansion;
     }
 
-    public Map<Integer, List<TermId>> getDiseaseIndexToHpoTermsNoExpansion() {
-        return diseaseIndexToHpoTermsNoExpansion;
-    }
-
-    public void setDiseaseIndexToHpoTermsNoExpansion(Map<Integer, List<TermId>> diseaseIndexToHpoTermsNoExpansion) {
-        this.diseaseIndexToHpoTermsNoExpansion = diseaseIndexToHpoTermsNoExpansion;
-    }
+//    public Map<Integer, List<TermId>> getDiseaseIndexToHpoTermsNoExpansion() {
+//        return diseaseIndexToHpoTermsNoExpansion;
+//    }
+//
+//    public void setDiseaseIndexToHpoTermsNoExpansion(Map<Integer, List<TermId>> diseaseIndexToHpoTermsNoExpansion) {
+//        this.diseaseIndexToHpoTermsNoExpansion = diseaseIndexToHpoTermsNoExpansion;
+//    }
 }

@@ -24,16 +24,16 @@ public class PhenomiserApp {
         long startTime = System.currentTimeMillis();
 
         PhenomiserApp phenomiserApp = new PhenomiserApp();
-        PreComputeCommand preComputeCommand = new PreComputeCommand();
-        QueryCommand queryCommand = new QueryCommand();
-        GridSearchCommand gridSearchCommand = new GridSearchCommand();
-        PhenopacketCommand phenopacket = new PhenopacketCommand();
+        PhenomiserCommand preComputeCommand = new PreComputeCommand();
+        PhenomiserCommand queryCommand = new QueryCommand();
+        PhenomiserCommand gridSearchCommand = new GridSearchCommand();
+        PhenomiserCommand phenopacketCmd = new PhenopacketCommand();
         JCommander jc = JCommander.newBuilder()
                 .addObject(phenomiserApp)
                 .addCommand("precompute", preComputeCommand)
                 .addCommand("query", queryCommand)
                 .addCommand("grid", gridSearchCommand)
-                .addCommand("phenopacket",phenopacket)
+                .addCommand("phenopacket", phenopacketCmd)
                 .build();
         jc.setProgramName("java -jar PhenomiserApp.jar");
         try {
@@ -75,13 +75,12 @@ public class PhenomiserApp {
                 phenomiserCommand = gridSearchCommand;
                 break;
             case "phenopacket":
-                phenomiserCommand = phenopacket;
+                phenomiserCommand = phenopacketCmd;
                 break;
             default:
                 System.err.println(String.format("[ERROR] command \"%s\" not recognized",command));
                 jc.usage();
                 System.exit(1);
-
         }
 
         phenomiserCommand.run();

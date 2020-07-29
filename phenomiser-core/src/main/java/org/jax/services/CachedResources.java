@@ -1,7 +1,6 @@
 package org.jax.services;
 
 import org.jax.io.DiseaseParser;
-import org.jax.io.HpoParser;
 import org.monarchinitiative.phenol.ontology.algo.InformationContentComputation;
 import org.monarchinitiative.phenol.ontology.data.TermId;
 import org.monarchinitiative.phenol.ontology.scoredist.ScoreDistribution;
@@ -26,20 +25,19 @@ public class CachedResources extends AbstractResources{
     /**
      * Use this constructor if we know we are analyzing a query with a specific number of query terms.
      * Then there is no need to load all of the cached score distribution files.
-     * @param hpoParser
      * @param diseaseParser
      * @param cachePath
      * @param n_terms
      */
-    public CachedResources(HpoParser hpoParser, DiseaseParser diseaseParser,
+    public CachedResources(DiseaseParser diseaseParser,
                            String cachePath, Integer n_terms) {
-        super(hpoParser, diseaseParser);
+        super(diseaseParser);
         this.cachingPath = cachePath;
         this.n_terms_in_query = n_terms;
     }
 
-    public CachedResources(HpoParser hpoParser, DiseaseParser diseaseParser, String cachePath) {
-        super(hpoParser, diseaseParser);
+    public CachedResources(DiseaseParser diseaseParser, String cachePath) {
+        super(diseaseParser);
         this.cachingPath = cachePath;
         this.n_terms_in_query = null;
     }
@@ -70,8 +68,6 @@ public class CachedResources extends AbstractResources{
 
     @Override
     public void init() {
-        super.defaultInit();
-
         String icMapPath = cachingPath + File.separator + "icMap.binary";
         String resnikSimilarityPath = cachingPath + File.separator + "resnikSimilarity.binary";
         String scoreDistributionsPath = cachingPath + File.separator + "scoreDistributions.binary";

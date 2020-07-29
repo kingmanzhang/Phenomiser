@@ -5,12 +5,9 @@ import com.beust.jcommander.Parameters;
 import org.jax.Phenomiser;
 import org.jax.grid.GridSearch;
 import org.jax.io.DiseaseParser;
-import org.jax.io.HpoParser;
 import org.jax.services.AbstractResources;
 import org.jax.services.CachedResources;
 import org.jax.utils.DiseaseDB;
-import org.monarchinitiative.phenol.base.PhenolException;
-import org.monarchinitiative.phenol.io.obo.hpo.HpoDiseaseAnnotationParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,7 +32,7 @@ public class GridSearchCommand extends PhenomiserCommand {
     @Parameter(names = {"-da", "--disease_annotation"}, description = "specify the path to disease annotation file")
     private String diseasePath;
     @Parameter(names = {"-cachePath", "--cachePath"}, description = "specify the path to save precomputed data")
-    private String cachePath = HOME + File.separator + "Phenomiser_data";;
+    private String cachePath = HOME + File.separator + "Phenomiser_data";
     @Parameter(names = {"-db", "--diseaseDB"},
             description = "choose disease database [OMIM,ORPHA]")
     private String diseaseDB = "OMIM";
@@ -57,26 +54,14 @@ public class GridSearchCommand extends PhenomiserCommand {
 
     @Override
     public void run() {
-
         checkSignal();
-
-        HpoParser hpoParser = new HpoParser(hpoPath);
-        hpoParser.init();
-        HpoDiseaseAnnotationParser diseaseAnnotationParser = new HpoDiseaseAnnotationParser(diseasePath, hpoParser.getHpo());
-        DiseaseParser diseaseParser = new DiseaseParser(diseaseAnnotationParser, hpoParser.getHpo());
-        try {
-            diseaseParser.init();
-        } catch (PhenolException e) {
-            e.printStackTrace();
-            System.exit(1);
-        }
+        DiseaseParser diseaseParser = new DiseaseParser(diseasePath, hpoPath, diseaseDB);
 
         if (!Files.exists(Paths.get(cachePath))){
             System.err.print("Cannot find caching data at " + cachePath);
             System.exit(1);
         }
-        resources = new CachedResources(hpoParser, diseaseParser, cachePath,
-                1);
+        resources = new CachedResources(diseaseParser, cachePath, 1);
         resources.init();
         Phenomiser.setResources(resources);
 

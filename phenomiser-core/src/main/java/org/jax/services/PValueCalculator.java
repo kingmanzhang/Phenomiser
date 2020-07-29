@@ -3,26 +3,23 @@ package org.jax.services;
 import org.jax.model.Item2PValueAndSimilarity;
 import org.monarchinitiative.phenol.ontology.data.TermId;
 import org.monarchinitiative.phenol.ontology.scoredist.ScoreDistribution;
-import org.monarchinitiative.phenol.stats.BenjaminiHochberg;
-import org.monarchinitiative.phenol.stats.Item2PValue;
-import org.monarchinitiative.phenol.stats.MultipleTestingCorrection;
 
-import java.util.ArrayList;
+
 import java.util.HashMap;
-import java.util.List;
+
 import java.util.Map;
-import java.util.function.Consumer;
+
 
 /**
  *
  */
 public class PValueCalculator  {
 
-    private Map<Integer, ScoreDistribution> scoreDistributions;
+    private final Map<Integer, ScoreDistribution> scoreDistributions;
 
-    private Map<TermId, Double> similarityScores;
+    private final Map<TermId, Double> similarityScores;
 
-    private Map<Integer, TermId> diseaseIndexToDisease;
+    //private Map<Integer, TermId> diseaseIndexToDisease;
 
     private int queryTermCount;
 
@@ -31,27 +28,26 @@ public class PValueCalculator  {
         this.queryTermCount = Math.min(queryTermCount, 10);
         this.similarityScores = similarityScores;
         this.scoreDistributions = resources.getScoreDistributions();
-        this.diseaseIndexToDisease = resources.getDiseaseIndexToDisease();
+        //this.diseaseIndexToDisease = resources.getDiseaseIndexToDisease();
     }
 
-    public Map<TermId, Item2PValueAndSimilarity<TermId>> calculatePValues() {
+    public Map<TermId, Item2PValueAndSimilarity> calculatePValues() {
 
-        Map<TermId, Item2PValueAndSimilarity<TermId>> p_values = new
+        Map<TermId, Item2PValueAndSimilarity> p_values = new
                 HashMap<>();
         similarityScores.forEach((diseaseId, similarityScore) -> {
             if (scoreDistributions.containsKey(queryTermCount) &&
                     scoreDistributions.get(queryTermCount)
-                            .getObjectScoreDistribution(diseaseId.hashCode()) != null) {
+                            .getObjectScoreDistribution(diseaseId) != null) {
                 double p = scoreDistributions.get(queryTermCount)
-                        .getObjectScoreDistribution(diseaseId.hashCode())
+                        .getObjectScoreDistribution(diseaseId)
                         .estimatePValue(similarityScore);
-                if(diseaseIndexToDisease.get(diseaseId.hashCode()).getValue().equals("OMIM:612642")) {
+                if(diseaseId.getValue().equals("OMIM:612642")) {
                     System.err.println("SCORE=" + scoreDistributions.get(queryTermCount)
-                            .getObjectScoreDistribution(diseaseId.hashCode()));
+                            .getObjectScoreDistribution(diseaseId));
                 }
 
-                p_values.put(diseaseId, new Item2PValueAndSimilarity<>
-                        (diseaseId, p, similarityScore));
+                p_values.put(diseaseId, new Item2PValueAndSimilarity(diseaseId, p, similarityScore));
             }
         });
 
